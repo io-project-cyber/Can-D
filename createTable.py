@@ -4,16 +4,24 @@ import random
 def generateTable(type):
     if type == "admin":
         #Creating Admin style table
-        listSize = 3
+        listSize = 10
 
         output = [ [0]*5 for i in range(listSize)]
         output[0] = ["adminID", "firstName", "lastName", "username", "password"]
 
-        adminIDchoices = [1, 2]
-        firstNameChoices = ["Marko", "Brandon"]
-        lastNameChoices = ["Morrison", "Bui"]
-        usernameChoices = ["kali", "root"]
-        passwordChoices = ["kali", "root"]
+        adminIDchoices = [1, 2, 3]
+        firstNameChoices = []
+        with open('./firstnames.txt') as f:
+            firstNameChoices = f.read().splitlines()
+        lastNameChoices = []
+        with open('./lastnames.txt') as f:
+            lastNameChoices = f.read().splitlines()
+        usernameChoices = ["kali", "root", "username", "myname"]
+        with open('./usernames.txt') as f:
+            usernameChoices = f.read().splitlines()
+        passwordChoices = ["kali", "root", "password", "mypassword123"]
+        with open('./passwords.txt') as f:
+            passwordChoices = f.read().splitlines()
 
         for x in range(1, listSize):
             output[x] = [random.choice(adminIDchoices), random.choice(firstNameChoices), random.choice(lastNameChoices), random.choice(usernameChoices), random.choice(passwordChoices)]
@@ -27,8 +35,5 @@ def printTable(input):
 
 myAdmin = generateTable("admin")
 printTable(myAdmin)
-
-# headers = ["adminID", "firstName", "lastName", "username", "password"]
-# row1 = [1, "Marko", "Morrison", "kali", "kali"]
 
 
