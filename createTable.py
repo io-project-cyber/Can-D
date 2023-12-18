@@ -1,10 +1,23 @@
-from texttable import Texttable
+from tabulate import tabulate
 
-def printAsTable(myList):
-    output = Texttable()
-    output.add_rows(myList)
-    print(output.draw())
+def generateTable(type):
+    if type == "admin":
+        #Creating Admin style table
+        output = [ [0]*5 for i in range(3)]
+        output[0] = ["adminID", "firstName", "lastName", "username", "password"]
+        output[1] = ["1", "Marko", "Morrison", "kali", "kali"]
+        output[2] = ["2", "Brandon", "Bui", "root", "root"]
+        return output
 
-T = [[11, 12, 5, 2], [15, 6,10, 0], [10, 8, 12, 5], [12,15,8,6]]
-printAsTable(T)
+def printTable(input):
+    headers = input[0]
+    del input[0]
+    print(tabulate(input, headers, tablefmt='psql'))
+
+myAdmin = generateTable("admin")
+printTable(myAdmin)
+
+# headers = ["adminID", "firstName", "lastName", "username", "password"]
+# row1 = [1, "Marko", "Morrison", "kali", "kali"]
+
 
