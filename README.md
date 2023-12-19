@@ -1,6 +1,6 @@
 # Database In A Can (DIAC)
 
-DIAC is a proof-of-concept cyber deception tool. Using wordlists of names and login credentials, DIAC outputs a randomly generated list of "sensitive information" (actually junk credentials) in MySQL format. This tool is intended to be used in  
+DIAC is a proof-of-concept cyber deception tool. Using wordlists of names and login credentials, DIAC outputs a randomly generated list of "sensitive information" (actually junk credentials) in MySQL format. This tool is intended to be used in a high interaction MySQL honeypot that provides false information.
 
 >PLANNED: The user can select a minimum password length. 
 
