@@ -1,3 +1,5 @@
-# Get Out Uf Jail (GOUJ)
+# Database In A Can
 
-GOUJ is a proof-of-concept
+DIAC is a proof-of-concept cyber deception tool. Using wordlists of names and login credentials
+
+>PLANNED: The user can select a minimum password length.
