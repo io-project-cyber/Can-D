@@ -1,12 +1,11 @@
-from tabulate import tabulate
 import random
 
-def generateTable(type):
-    if type == "admin":
-        #Creating Admin style table
-        listSize = 50
+numColumns = 5
+numRows = 50
 
-        output = [ [0]*5 for i in range(listSize)]
+def generateData():
+
+        output = [ [0]*numColumns for i in range(numRows)]
         output[0] = ["adminID", "firstName", "lastName", "username", "password"]
 
         firstNameChoices = []
@@ -22,17 +21,26 @@ def generateTable(type):
         with open('./passwords.txt') as f:
             passwordChoices = f.read().splitlines()
 
-        for x in range(1, listSize):
+	#Populate
+        for x in range(1, numRows):
             output[x] = [x, random.choice(firstNameChoices), random.choice(lastNameChoices), random.choice(usernameChoices), random.choice(passwordChoices)]
 
         return output
 
-def printTable(input):
-    headers = input[0]
-    del input[0]
-    print(tabulate(input, headers, tablefmt='psql'))
+def printTableAsCSV(input):
+    for x in range(0, numRows): #For each row:
+    	for y in range(0, numColumns - 1):
+    		print(input[x][y],",",end='',sep='')
+    	print(input[x][numColumns - 1])
 
-myAdmin = generateTable("admin")
-printTable(myAdmin)
+
+
+
+
+
+
+#MAIN
+myAdmin = generateData()
+printTableAsCSV(myAdmin)
 
 
