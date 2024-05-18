@@ -4,6 +4,8 @@ Can-D is a proof-of-concept cyber deception tool. Using wordlists of names and l
 
 Use this in a legitimate database hosting valuable data or in a dedicated "sensor" server to bait attackers into exfiltrating completely uesless data!
 
+The tool also inserts an unusually long or complex set of credentials called the "telling" credential. If you see this used somewhere else in your network or in a future attack, you'll know this database is stolen and being used - potential attribution!
+
 >PLANNED: The user can select a minimum password length. 
 
 >PLANNED: The user can provide a list of company usernames that they want included. Done to add realism.
