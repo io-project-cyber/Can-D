@@ -5,9 +5,11 @@ import yaml
 #Read config file, set up global variables
 config = yaml.safe_load(open("./config.yml"))
 
+#Set up columns and row num
 numColumns = config['general']['num_columns']
 numEntries = config['general']['num_entries']
 
+#Set up telling credential location
 if (config['general']['telling_cred_index_in_table'] == -1): #If not specified, place the telling credential at a random point past halfway in the table
     tellingCredLoc = int((random.random() * ((numEntries - 1) / 2)) + (numEntries / 2))
 else: #Otherwise, place it at the specified location
@@ -16,6 +18,10 @@ else: #Otherwise, place it at the specified location
 print("Your telling credential is at entry",tellingCredLoc)
 print("-------------------------------------")
 
+#Set up username convention
+firstNameLetterNum = config['usernames']['naming_convention']['first_name_letter_num']
+lastNameLetterNum = config['usernames']['naming_convention']['last_name_letter_num']
+firstNamePlacedFirst = config['usernames']['naming_convention']['first_name_placed_first']
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -54,15 +60,52 @@ def generateUsernames(input):
     with open('./usernames.txt') as f:
         usernameChoices = f.read().splitlines()
 
+    uniqueUsernamesPostProcess = {}
+
 
     #Iterate through list, select a username for each entry.
     for x in range(1, numEntries):
         if (x != tellingCredLoc):
-            input[x][3] = random.choice(usernameChoices)
+            #input[x][3] = random.choice(usernameChoices)
+            input[x][3] = usernameConventionApplicator(input[x][1], input[x][2], uniqueUsernamesPostProcess)
         else:
             input[x][3] = random.choice(usernameChoices) + random.choice(usernameChoices) + random.choice(usernameChoices)
             
         
+def usernameConventionApplicator(firstName, lastName, uniqueUsernameDict):
+    
+    #Prepare first name and last name  
+    processedFirstName = firstName                              #First name
+    processedFirstName.replace(" ", "")                         #Remove spaces
+    processedFirstName = processedFirstName.lower()             #Convert to lowercase
+    if firstNameLetterNum != -1:                                #Take desired number of letters (if specified)
+        processedFirstName = processedFirstName[:firstNameLetterNum]   
+
+    processedLastName = lastName                                #Last name
+    processedLastName.replace(" ", "")                          #Remove spaces
+    processedLastName = processedLastName.lower()               #Convert to lowercase
+    if lastNameLetterNum != -1:                                 #Take desired number of letters (if specified)
+        processedLastName = processedLastName[:lastNameLetterNum]
+
+    #Put these together, check uniqueUsernames to see how many times the username has been created
+    uniqueUsername = ""
+    if firstNamePlacedFirst:
+        uniqueUsername = processedFirstName + processedLastName
+    else:
+        uniqueUsername = processedLastName + processedFirstName
+    
+    numberToAdd = ""
+    if uniqueUsername in uniqueUsernameDict:                    #If the name has been created already, increment it by one, get the number, append, and return this username
+        uniqueUsernameDict[uniqueUsername] += 1
+        numberToAdd = uniqueUsernameDict[uniqueUsername]
+        uniqueUsername += str(numberToAdd)
+        return uniqueUsername
+    else:                                                       #If the name hasn't been created already, crate an entry and return the username
+        uniqueUsernameDict[uniqueUsername] = 1
+        return uniqueUsername
+
+
+    
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

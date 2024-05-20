@@ -5,5 +5,8 @@ general:
 full_names:
 
 usernames:
-  
+  naming_convention:
+    first_name_letter_num: -1
+    last_name_letter_num: -1
+    first_name_placed_first: True
 passwords:
