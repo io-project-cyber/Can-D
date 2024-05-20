@@ -6,13 +6,11 @@ Use this in a legitimate database hosting valuable data or in a dedicated "senso
 
 The tool also inserts an unusually long or complex set of credentials called the "telling" credential. If you see this used somewhere else in your network or in a future attack, you'll know that the table is stolen and being used - potential attribution!
 
+Can-D allows you to modify the username convention in config.yml by changing the number of letters taken from the first and last name of each person and the order in which the username is put together. Repeated names are given trailing numbers for uniqueness.
+
 >PLANNED: The user can select a minimum password length. 
 
 >PLANNED: The user can provide a list of company usernames that they want included. Done to add realism.
-
->PLANNED: The user can provide a regex expression to DIAC that correspond to a naming convention. When generating usernames, DIAC follows this convention for more consistent, realistic results. Fake employee Barbara Cohen wouldn't have the username "michaelj4."
-
->EXAMPLE: My name is Marko Morrison and my company username is markom2. This means that I want first name + last initial + no. if repeating. With these conventions, if DIAC were to generate four names for Kathy Smith, the last username would be ksmith4.
 
 >PLANNED: Some passwords are more common than others - it's probably unusual to see perfectly unique passwords in a company. Therefore, assign different weight to passwords based on repetition (no need to make it too complicated.)
 
