@@ -5,9 +5,9 @@ Can-D is a proof-of-concept cyber deception tool. Using wordlists of names and l
 Use this in a legitimate database hosting valuable data or in a dedicated "sensor" server to bait attackers into exfiltrating completely uesless data!
 
 Features:
-- Username convention configuration - make the junk usernames resemble real ones from your company!
-- Password complexity filtering - make the junk passwords comply with your password policy!
-- "Telling credential" - an exceptionally complex and unique password is inserted somewhere into the output. Use this cred to determine if your junk data is being used in a spraying attack!
+- **Username convention configuration** - make the junk usernames resemble real ones from your company!
+- **Password complexity filtering** - make the junk passwords comply with your password policy!
+- **"Telling credential"** - an exceptionally complex and unique password is inserted somewhere into the output. Use this cred to determine if your junk data is being used in a spraying attack!
 
 >PLANNED: The user can select a minimum password length. 
 
