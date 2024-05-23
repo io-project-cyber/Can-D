@@ -1,7 +1,7 @@
 general:
   num_entries: 100
   num_columns: 5
-  telling_cred_index_in_table: 4
+  telling_cred_index_in_table: -1
 full_names:
 
 usernames:
@@ -10,3 +10,8 @@ usernames:
     last_name_letter_num: -1
     first_name_placed_first: True
 passwords:
+  complexity_requirements:
+    minimum_length: -1
+    minimum_digits: -1
+    minimum_symbols: -1
+    minimum_caps: -1

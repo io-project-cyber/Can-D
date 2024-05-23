@@ -22,6 +22,13 @@ print("-------------------------------------")
 firstNameLetterNum = config['usernames']['naming_convention']['first_name_letter_num']
 lastNameLetterNum = config['usernames']['naming_convention']['last_name_letter_num']
 firstNamePlacedFirst = config['usernames']['naming_convention']['first_name_placed_first']
+
+#Set up password requirements
+passwordMinLength = config['passwords']['complexity_requirements']['minimum_length']
+passwordMinDigits = config['passwords']['complexity_requirements']['minimum_digits']
+passwordMinSymbols = config['passwords']['complexity_requirements']['minimum_symbols']
+passwordMinCaps = config['passwords']['complexity_requirements']['minimum_caps']
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -62,7 +69,6 @@ def generateUsernames(input):
 
     uniqueUsernamesPostProcess = {}
 
-
     #Iterate through list, select a username for each entry.
     for x in range(1, numEntries):
         if (x != tellingCredLoc):
@@ -74,6 +80,10 @@ def generateUsernames(input):
         
 def usernameConventionApplicator(firstName, lastName, uniqueUsernameDict):
     
+    global firstNameLetterNum
+    global lastNameLetterNum
+    global firstNamePlacedFirst
+
     #Prepare first name and last name  
     processedFirstName = firstName                              #First name
     processedFirstName.replace(" ", "")                         #Remove spaces
@@ -115,9 +125,85 @@ def usernameConventionApplicator(firstName, lastName, uniqueUsernameDict):
 # When passed a credential table WITH FIRST NAME, LAST NAME, AND USERNAME FILLED IN,
 # Select and insert a password (password -> [4] for each row)
 def generatePasswords(input):
+
+    global passwordMinLength
+    global passwordMinDigits
+    global passwordMinSymbols
+    global passwordMinCaps
+
+
+    #Read in all passwords
     passwordChoices = []
     with open('./passwords.txt') as f:
         passwordChoices = f.read().splitlines()
+
+    #Adjust password complexity specifications (defaults to no requirements)
+    if passwordMinLength == -1:
+        passwordMinLength = 0
+    if passwordMinDigits == -1:
+        passwordMinDigits = 0
+    if passwordMinSymbols == -1:
+        passwordMinSymbols = 0
+    if passwordMinCaps == -1:
+        passwordMinCaps = 0
+
+    filteredPasswordChoices = []
+    #Filter passwords based on complexity requirements
+    
+    
+    #Filter length
+    for x in range(0, len(passwordChoices)):
+        if len(passwordChoices[x]) >= passwordMinLength:
+            filteredPasswordChoices.append(passwordChoices[x])
+    passwordChoices.clear()
+    for x in range(0, len(filteredPasswordChoices)):
+        passwordChoices.append(filteredPasswordChoices[x])
+    filteredPasswordChoices.clear()
+    
+    #Filter digits
+    for x in range(0, len(passwordChoices)):
+        digitsInWord = []
+        for y in range(0, len(passwordChoices[x])):
+            if passwordChoices[x][y].isdigit():
+                digitsInWord.append(passwordChoices[x][y])
+        #print("Digits for",passwordChoices[x],":",digitsInWord)
+        if len(digitsInWord) >= passwordMinDigits:
+            filteredPasswordChoices.append(passwordChoices[x])
+    passwordChoices.clear()
+    for x in range(0, len(filteredPasswordChoices)):
+        passwordChoices.append(filteredPasswordChoices[x])
+    filteredPasswordChoices.clear()
+
+
+    #Filter symbols
+    symbolSet = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "~", "`", "-", "_", "=", "+", "[", "]", "{", "}", "\\", "|", ";", ":", "\'", "\"", ",", ".", "<", ">", "/", "?"}
+    for x in range(0, len(passwordChoices)):
+        symbolsInWord = []
+        for y in range(0, len(passwordChoices[x])):
+            if passwordChoices[x][y] in symbolSet:
+                symbolsInWord.append(passwordChoices[x][y])
+        #print("Digits for",passwordChoices[x],":",digitsInWord)
+        if len(symbolsInWord) >= passwordMinSymbols:
+            filteredPasswordChoices.append(passwordChoices[x])
+    passwordChoices.clear()
+    for x in range(0, len(filteredPasswordChoices)):
+        passwordChoices.append(filteredPasswordChoices[x])
+    filteredPasswordChoices.clear()
+
+
+    #Filter caps
+    for x in range(0, len(passwordChoices)):
+        capsInWord = []
+        for y in range(0, len(passwordChoices[x])):
+            if passwordChoices[x][y].isupper():
+                capsInWord.append(passwordChoices[x][y])
+        #print("Digits for",passwordChoices[x],":",digitsInWord)
+        if len(capsInWord) >= passwordMinCaps:
+            filteredPasswordChoices.append(passwordChoices[x])
+    passwordChoices.clear()
+    for x in range(0, len(filteredPasswordChoices)):
+        passwordChoices.append(filteredPasswordChoices[x])
+    filteredPasswordChoices.clear()
 
     for x in range(1, numEntries):
         if (x != tellingCredLoc):
