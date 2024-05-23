@@ -9,8 +9,6 @@ Features:
 - **Password complexity filtering** - make the junk passwords comply with your password policy!
 - **"Telling credential"** - an exceptionally complex and unique password is inserted somewhere into the output. Use this cred to determine if your junk data is being used in a spraying attack!
 
->PLANNED: The user can select a minimum password length. 
-
 >PLANNED: The user can provide a list of company usernames that they want included. Done to add realism.
 
 >PLANNED: Some passwords are more common than others - it's probably unusual to see perfectly unique passwords in a company. Therefore, assign different weight to passwords based on repetition (no need to make it too complicated.)
