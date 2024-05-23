@@ -4,9 +4,10 @@ Can-D is a proof-of-concept cyber deception tool. Using wordlists of names and l
 
 Use this in a legitimate database hosting valuable data or in a dedicated "sensor" server to bait attackers into exfiltrating completely uesless data!
 
-The tool also inserts an unusually long or complex set of credentials called the "telling" credential. If you see this used somewhere else in your network or in a future attack, you'll know that the table is stolen and being used - potential attribution!
-
-Can-D allows you to modify the username convention in config.yml by changing the number of letters taken from the first and last name of each person and the order in which the username is put together. Repeated names are given trailing numbers for uniqueness.
+Features:
+- Username convention configuration - make the junk usernames resemble real ones from your company!
+- Password complexity filtering - make the junk passwords comply with your password policy!
+- "Telling credential" - an exceptionally complex and unique password is inserted somewhere into the output. Use this cred to determine if your junk data is being used in a spraying attack!
 
 >PLANNED: The user can select a minimum password length. 
 
