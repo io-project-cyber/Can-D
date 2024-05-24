@@ -1,6 +1,7 @@
 import random
 import datetime
 import yaml
+import csv
 
 #Read config file, set up global variables
 config = yaml.safe_load(open("./config.yml"))
@@ -8,6 +9,9 @@ config = yaml.safe_load(open("./config.yml"))
 #Set up columns and row num
 numColumns = config['general']['num_columns']
 numEntries = config['general']['num_entries']
+
+#Set up credentials to insert
+credentialsToInsert = config['general']['credentials_to_include']
 
 #Set up telling credential location
 if (config['general']['telling_cred_index_in_table'] == -1): #If not specified, place the telling credential at a random point past halfway in the table
@@ -216,6 +220,28 @@ def generatePasswords(input):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def insertPredefinedCredentials(output):
+    #Check if there's credentials in the first place.
+    #If there are,
+    global credentialsToInsert
+    if credentialsToInsert is not None:
+        #parse them as a CSV
+        formatted_cred = csv.reader(credentialsToInsert)
+        #for each entry in the list, choose a random index in the list, insert a new row, add the creds
+        for x in formatted_cred:
+            insertionIndex = int(random.random() * (len(output)-1))
+            output.insert(insertionIndex, [insertionIndex])
+            for y in x:
+                (output[insertionIndex]).append(y)
+            
+            #increment every ID ([x][1]) after 
+            for z in range(insertionIndex + 1, len(output) - 1):
+                output[z][0] += 1
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 
 
@@ -241,6 +267,8 @@ def generateCredentialTable():
     print("PW:",output[tellingCredLoc][4])
     print("RECORD THESE NOW!")
     print("-------------------------------------")
+
+    insertPredefinedCredentials(output)
 
     return output
 
