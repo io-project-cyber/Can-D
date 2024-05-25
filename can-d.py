@@ -14,9 +14,14 @@ parser.add_argument("-q", "--quiet", help="enables quiet operation", action="sto
     #Output type
 arg_outputType = parser.add_mutually_exclusive_group()
 arg_outputType.add_argument("-c", "--cli", action="store_true", help="output the csv result to the command line")
-arg_outputType.add_argument("-o", "--output-to-file", dest="outputFilePath", type=str, help="output the csv result to the provided file path")
+arg_outputType.add_argument("-o", "--output-to-file", dest="outputFilePath", type=str, help="output the csv result to the provided filepath")
     #Config YML to use
-parser.add_argument("--config-yml-path", dest="configFilePath", type=str, help="location of the config file to use")
+parser.add_argument("--config-yml-filepath", dest="configFilePath", type=str, help="filepath of the config file to use")
+    #Simple mode wordlists to use 
+parser.add_argument("--first-name-filepath", dest="firstNameFilePath", type=str, help="filepath of the first name wordlist to use (simple mode only)")
+parser.add_argument("--last-name-filepath", dest="lastNameFilePath", type=str, help="filepath of the last name wordlist to use (simple mode only)")
+parser.add_argument("--username-filepath", dest="usernameFilePath", type=str, help="filepath of the username wordlist to use (for telling credential ONLY)")
+parser.add_argument("--password-filepath", dest="passwordFilePath", type=str, help="filepath of the password wordlist to use (simple mode only)")
 
 args = parser.parse_args()
 
@@ -64,11 +69,17 @@ passwordMinCaps = config['passwords']['complexity_requirements']['minimum_caps']
 # Select and insert a full name (First name -> [1], Last name -> [2]) for each row
 def generateFullNames(input):
     firstNameChoices = []
-    with open('./firstnames.txt') as f:
+    firstNameFilePath = "./default-wordlists/firstnames.txt"
+    if args.firstNameFilePath is not None:
+        firstNameFilePath = args.firstNameFilePath
+    with open(firstNameFilePath) as f:
         firstNameChoices = f.read().splitlines()
     
     lastNameChoices = []
-    with open('./lastnames.txt') as f:
+    lastNameFilePath = "./default-wordlists/lastnames.txt"
+    if args.lastNameFilePath is not None:
+        lastNameFilePath = args.lastNameFilePath
+    with open(lastNameFilePath) as f:
         lastNameChoices = f.read().splitlines()
 
     for x in range(1, numEntries):
@@ -89,7 +100,10 @@ def generateUsernames(input):
 
     #TEMPORARY: Loading in username options from a file
     usernameChoices = []
-    with open('./usernames.txt') as f:
+    usernameFilePath = "./default-wordlists/usernames.txt"
+    if args.usernameFilePath is not None:
+        usernameFilePath = args.usernameFilePath
+    with open(usernameFilePath) as f:
         usernameChoices = f.read().splitlines()
 
     uniqueUsernamesPostProcess = {}
@@ -160,7 +174,10 @@ def generatePasswords(input):
 
     #Read in all passwords
     passwordChoices = []
-    with open('./passwords.txt') as f:
+    passwordFilePath = "./default-wordlists/passwords.txt"
+    if args.passwordFilePath is not None:
+        passwordFilePath = args.passwordFilePath
+    with open(passwordFilePath) as f:
         passwordChoices = f.read().splitlines()
 
     #Adjust password complexity specifications (defaults to no requirements)
