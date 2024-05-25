@@ -1,10 +1,31 @@
+#!/bin/python3
+
 import random
 import datetime
 import yaml
 import csv
+import argparse
 
+#SET UP ARGS
+parser = argparse.ArgumentParser(description="A deceptive credential generator for cyber defense. Creates a CSV output of useless, \"junk\" credentials intended to look real. Use this in a honeypot or legitimate database and introduce uncertainty to exfiltrated data. Can output to file or CLI.")
+#General arguments
+    #Verbosity
+parser.add_argument("-q", "--quiet", help="enables quiet operation", action="store_true")
+    #Output type
+arg_outputType = parser.add_mutually_exclusive_group()
+arg_outputType.add_argument("-c", "--cli", action="store_true", help="output the csv result to the command line")
+arg_outputType.add_argument("-o", "--output-to-file", dest="outputFilePath", type=str, help="output the csv result to the provided file path")
+    #Config YML to use
+parser.add_argument("--config-yml-path", dest="configFilePath", type=str, help="location of the config file to use")
+
+args = parser.parse_args()
+
+#SET UP CONFIG FILE
 #Read config file, set up global variables
-config = yaml.safe_load(open("./config.yml"))
+configLoc = "./config.yml"
+if args.configFilePath is not None:
+    configLoc = args.configFilePath
+config = yaml.safe_load(open(configLoc))
 
 #Set up columns and row num
 numColumns = config['general']['num_columns']
@@ -19,8 +40,9 @@ if (config['general']['telling_cred_index_in_table'] == -1): #If not specified, 
 else: #Otherwise, place it at the specified location
     tellingCredLoc = config['general']['telling_cred_index_in_table']
 
-print("Your telling credential is at entry",tellingCredLoc)
-print("-------------------------------------")
+if not args.quiet:
+    print("Your telling credential is at entry",tellingCredLoc)
+    print("-------------------------------------")
 
 #Set up username convention
 firstNameLetterNum = config['usernames']['naming_convention']['first_name_letter_num']
@@ -63,7 +85,6 @@ def generateFullNames(input):
 
 # When passed a credential table WITH FIRST AND LAST NAMES FILLED IN,
 # Select and insert a username (based on the full name, username -> [3]) for each row
-# TODO - Use some kind of reverse regex to follow a naming convention
 def generateUsernames(input):
 
     #TEMPORARY: Loading in username options from a file
@@ -81,7 +102,8 @@ def generateUsernames(input):
         else:
             input[x][3] = random.choice(usernameChoices) + random.choice(usernameChoices) + random.choice(usernameChoices)
             
-        
+#When passed a first name, last name, and list of already created usernames,
+#Apply a globally defined username convention to the names, generating a unique username
 def usernameConventionApplicator(firstName, lastName, uniqueUsernameDict):
     
     global firstNameLetterNum
@@ -262,11 +284,12 @@ def generateCredentialTable():
     generatePasswords(output)
 
     #Print telling credential information
-    print("Your telling credentials are:")
-    print("UN:",output[tellingCredLoc][3])
-    print("PW:",output[tellingCredLoc][4])
-    print("RECORD THESE NOW!")
-    print("-------------------------------------")
+    if not args.quiet:
+        print("Your telling credentials are:")
+        print("UN:",output[tellingCredLoc][3])
+        print("PW:",output[tellingCredLoc][4])
+        print("RECORD THESE NOW!")
+        print("-------------------------------------")
 
     insertPredefinedCredentials(output)
 
@@ -280,14 +303,19 @@ def printTableAsCSV(input):
 
 def outputTableToCSVFile(input):
     timestamp = datetime.datetime.now()
-    filename = str(timestamp) + ".csv"
-    filepath = "./csv_storage/" + filename
+    filepath = ""
+    if args.outputFilePath is not None:
+        filepath = args.outputFilePath
+    else:
+        filename = str(timestamp) + ".csv"
+        filepath = "./csv-storage/" + filename
     outputfile = open(filepath, "w+")
     for x in range(0, numEntries): #For each row:
         for y in range(0, numColumns - 1): #For each entry, print in csv format
             print(input[x][y],",",end='',sep='',file=outputfile)
         print(input[x][numColumns - 1],file=outputfile)
-    print("Printing to file with timestamp:",timestamp,"in ./csv_storage")
+    if not args.quiet:
+        print("Printing to file with timestamp:",timestamp,"in ./csv_storage")
     
 
 #MAIN
@@ -295,9 +323,10 @@ def outputTableToCSVFile(input):
 #Create table
 myAdmin = generateCredentialTable()
 
-
 #Print it as CSV
-
-outputTableToCSVFile(myAdmin)
+if (args.cli):
+    printTableAsCSV(myAdmin)
+else:
+    outputTableToCSVFile(myAdmin)
 
 
