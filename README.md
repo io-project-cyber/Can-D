@@ -14,5 +14,3 @@ Features:
 >PLANNED: Some passwords are more common than others - it's probably unusual to see perfectly unique passwords in a company. Therefore, assign different weight to passwords based on repetition (no need to make it too complicated.)
 
 >PLANNED: Company demographics could be interesting when selecting names. If your IT team is 50% European, roughly that many would have names based in European countries, so selecting names based off your company's real demographic information could help enhance the realism.
-
->PLANNED: "Simple" mode (small wordlist) vs. "enhanced" mode (massive wordlists, unzip and filter in RAM)

@@ -1,5 +1,6 @@
 #!/bin/python3
 
+import urllib3
 import random
 import datetime
 import yaml
@@ -17,14 +18,16 @@ arg_verbosity.add_argument("-q", "--quiet", help="enables quiet operation", acti
     #Output type
 arg_outputType = parser.add_mutually_exclusive_group()
 arg_outputType.add_argument("-c", "--cli", action="store_true", help="output the csv result to the command line")
-arg_outputType.add_argument("-o", "--output-to-file", dest="outputFilePath", type=str, help="output the csv result to the provided filepath")
+arg_outputType.add_argument("-o", "--output-to-file", dest="outputFilePath", type=str, help="output the csv result to the provided filepath. Default: ./csv-storage/")
+    #Password offline or online mode
+parser.add_argument("-mP", "--password-mode", dest="passwordMode", type=str, choices=["offline", "online"], help="Specify password selection mode. Offline mode uses a stored wordlist to select passwords (Default wordlist is VERY BASIC!! REPLACE IF POSSIBLE!!) Quick and cheap, best suited for selecting simple passwords. Online mode loads a wordlist into RAM from a URL for selection. By default, this is set to a MUCH MORE ROBUST WORDLIST THAN OFFLINE MODE. Default: offline")
     #Config YML to use
-parser.add_argument("--config-yml-filepath", dest="configFilePath", type=str, help="filepath of the config file to use")
-    #Simple mode wordlists to use 
-parser.add_argument("--first-name-filepath", dest="firstNameFilePath", type=str, help="filepath of the first name wordlist to use (simple mode only)")
-parser.add_argument("--last-name-filepath", dest="lastNameFilePath", type=str, help="filepath of the last name wordlist to use (simple mode only)")
-parser.add_argument("--username-filepath", dest="usernameFilePath", type=str, help="filepath of the username wordlist to use (for telling credential ONLY)")
-parser.add_argument("--password-filepath", dest="passwordFilePath", type=str, help="filepath of the password wordlist to use (simple mode only)")
+parser.add_argument("--config-yml-filepath", dest="configFilePath", type=str, help="filepath of the config file to use. Default: ./config.yml")
+    #Offline mode wordlists to use 
+parser.add_argument("--first-name-filepath", dest="firstNameFilePath", type=str, help="filepath of the first name wordlist to use (offline mode only.) Default: ./default-wordlists/firstnames.txt")
+parser.add_argument("--last-name-filepath", dest="lastNameFilePath", type=str, help="filepath of the last name wordlist to use (offline mode only.) Default: ./default-wordlists/lastnames.txt")
+parser.add_argument("--username-filepath", dest="usernameFilePath", type=str, help="filepath of the username wordlist to use (for telling credential ONLY.) Default: ./default-wordlists/usernames.txt")
+parser.add_argument("--password-filepath", dest="passwordFilePath", type=str, help="filepath of the password wordlist to use (offline mode only.) Default: ./default-wordlists/passwords.txt")
 
 args = parser.parse_args()
 if args.verbose:
@@ -65,6 +68,9 @@ lastNameLetterNum = config['usernames']['naming_convention']['last_name_letter_n
 firstNamePlacedFirst = config['usernames']['naming_convention']['first_name_placed_first']
 if args.verbose:
     print("CONFIG: Username convention successfully parsed")
+
+#Set up online mode URL
+wordlistURL = config['passwords']['online_mode']['url']
 
 #Set up password requirements
 passwordMinLength = config['passwords']['complexity_requirements']['minimum_length']
@@ -188,19 +194,35 @@ def usernameConventionApplicator(firstName, lastName, uniqueUsernameDict):
 # Select and insert a password (password -> [4] for each row)
 def generatePasswords(input):
 
+    global wordlistURL
     global passwordMinLength
     global passwordMinDigits
     global passwordMinSymbols
     global passwordMinCaps
 
-
     #Read in all passwords
     passwordChoices = []
-    passwordFilePath = "./default-wordlists/passwords.txt"
-    if args.passwordFilePath is not None:
-        passwordFilePath = args.passwordFilePath
-    with open(passwordFilePath) as f:
-        passwordChoices = f.read().splitlines()
+    #If offline mode is being used
+    if args.passwordMode == "offline" or args.passwordMode is None:
+        if args.verbose:
+            print("PASSWORD: Offline mode enabled.")
+        passwordFilePath = "./default-wordlists/passwords.txt"
+        if args.passwordFilePath is not None:
+            passwordFilePath = args.passwordFilePath
+        if args.verbose:
+            print("PASSWORD: Using",passwordFilePath)
+        with open(passwordFilePath) as f:
+            passwordChoices = f.read().splitlines()
+    #Otherwise, online mode is being used
+    else:
+        if args.verbose:
+            print("PASSWORD: Online mode enabled.")
+            print("PASSWORD: Requesting wordlist from",wordlistURL)
+        http = urllib3.PoolManager()
+        resp = http.request("GET", wordlistURL)
+        if args.verbose:
+            print("PASSWORD: Request successful. Parsing into password choice list.")
+        passwordChoices = resp.data.decode().split('\n')
 
     #Adjust password complexity specifications (defaults to no requirements)
     if passwordMinLength == -1:

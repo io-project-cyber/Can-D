@@ -14,6 +14,8 @@ usernames:
     last_name_letter_num: -1
     first_name_placed_first: True
 passwords:
+  online_mode:
+    url: "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/xato-net-10-million-passwords.txt"
   complexity_requirements:
     minimum_length: -1
     minimum_digits: -1
