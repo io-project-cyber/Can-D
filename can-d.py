@@ -10,7 +10,10 @@ import argparse
 parser = argparse.ArgumentParser(description="A deceptive credential generator for cyber defense. Creates a CSV output of useless, \"junk\" credentials intended to look real. Use this in a honeypot or legitimate database and introduce uncertainty to exfiltrated data. Can output to file or CLI.")
 #General arguments
     #Verbosity
-parser.add_argument("-q", "--quiet", help="enables quiet operation", action="store_true")
+arg_verbosity = parser.add_mutually_exclusive_group()
+arg_verbosity.add_argument("-v", "--verbose", help="enables verbose operation", action="store_true")
+arg_verbosity.add_argument("-q", "--quiet", help="enables quiet operation", action="store_true")
+
     #Output type
 arg_outputType = parser.add_mutually_exclusive_group()
 arg_outputType.add_argument("-c", "--cli", action="store_true", help="output the csv result to the command line")
@@ -24,6 +27,8 @@ parser.add_argument("--username-filepath", dest="usernameFilePath", type=str, he
 parser.add_argument("--password-filepath", dest="passwordFilePath", type=str, help="filepath of the password wordlist to use (simple mode only)")
 
 args = parser.parse_args()
+if args.verbose:
+    print("CLI arguments successfully parsed")
 
 #SET UP CONFIG FILE
 #Read config file, set up global variables
@@ -31,34 +36,51 @@ configLoc = "./config.yml"
 if args.configFilePath is not None:
     configLoc = args.configFilePath
 config = yaml.safe_load(open(configLoc))
+if args.verbose:
+    print("Opened config YML file")
+    print("Beginning configuration parsing")
 
 #Set up columns and row num
 numColumns = config['general']['num_columns']
 numEntries = config['general']['num_entries']
+if args.verbose:
+    print("CONFIG: Table size successfully parsed")
 
 #Set up credentials to insert
 credentialsToInsert = config['general']['credentials_to_include']
+if args.verbose:
+    print("CONFIG: Predefined credentials successfully parsed")
 
 #Set up telling credential location
 if (config['general']['telling_cred_index_in_table'] == -1): #If not specified, place the telling credential at a random point past halfway in the table
     tellingCredLoc = int((random.random() * ((numEntries - 1) / 2)) + (numEntries / 2))
 else: #Otherwise, place it at the specified location
     tellingCredLoc = config['general']['telling_cred_index_in_table']
-
-if not args.quiet:
-    print("Your telling credential is at entry",tellingCredLoc)
-    print("-------------------------------------")
+if args.verbose:
+    print("CONFIG: Telling credential location successfully determined")
 
 #Set up username convention
 firstNameLetterNum = config['usernames']['naming_convention']['first_name_letter_num']
 lastNameLetterNum = config['usernames']['naming_convention']['last_name_letter_num']
 firstNamePlacedFirst = config['usernames']['naming_convention']['first_name_placed_first']
+if args.verbose:
+    print("CONFIG: Username convention successfully parsed")
 
 #Set up password requirements
 passwordMinLength = config['passwords']['complexity_requirements']['minimum_length']
 passwordMinDigits = config['passwords']['complexity_requirements']['minimum_digits']
 passwordMinSymbols = config['passwords']['complexity_requirements']['minimum_symbols']
 passwordMinCaps = config['passwords']['complexity_requirements']['minimum_caps']
+if args.verbose:
+    print("CONFIG: Password complexity specifications successfully parsed")
+
+#Complete
+if args.verbose:
+    print("Config file successfully parsed")
+
+if not args.quiet:
+    print("Your telling credential is at entry",tellingCredLoc)
+    print("-------------------------------------")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -290,23 +312,28 @@ def generateCredentialTable():
     output[0] = ["adminID", "firstName", "lastName", "username", "password"]
     for x in range(1, numEntries):
         output[x][0] = x
-
+    
     #Fill in full names of table
+    if args.verbose:
+        print("Selecting full names")
     generateFullNames(output) 
 
     #Generate username based on real name
+    if args.verbose:
+        print("Generating usernames")
     generateUsernames(output)
 
     #Read in credential options from wordlists
+    if args.verbose:
+        print("Selecting passwords")
     generatePasswords(output)
 
     #Print telling credential information
     if not args.quiet:
-        print("Your telling credentials are:")
+        print("\nYour telling credentials are:")
         print("UN:",output[tellingCredLoc][3])
         print("PW:",output[tellingCredLoc][4])
-        print("RECORD THESE NOW!")
-        print("-------------------------------------")
+        print("RECORD THESE NOW!\n")
 
     insertPredefinedCredentials(output)
 
@@ -338,12 +365,22 @@ def outputTableToCSVFile(input):
 #MAIN
 
 #Create table
+if args.verbose:
+    print("Beginning credential generation")
+
 myAdmin = generateCredentialTable()
+if not args.quiet:
+    print("Credential generation complete")
+    print("-------------------------------------")
 
 #Print it as CSV
+if args.verbose:
+    print("Beginning output process")
 if (args.cli):
     printTableAsCSV(myAdmin)
 else:
     outputTableToCSVFile(myAdmin)
+if args.verbose:
+    print("Output process complete")
 
 
