@@ -6,6 +6,7 @@ import datetime
 import yaml
 import csv
 import argparse
+import hashlib
 
 #SET UP ARGS
 parser = argparse.ArgumentParser(description="A deceptive credential generator for cyber defense. Creates a CSV output of useless, \"junk\" credentials intended to look real. Use this in a honeypot or legitimate database and introduce uncertainty to exfiltrated data. Can output to file or CLI.")
@@ -14,13 +15,14 @@ parser = argparse.ArgumentParser(description="A deceptive credential generator f
 arg_verbosity = parser.add_mutually_exclusive_group()
 arg_verbosity.add_argument("-v", "--verbose", help="enables verbose operation", action="store_true")
 arg_verbosity.add_argument("-q", "--quiet", help="enables quiet operation", action="store_true")
-
     #Output type
 arg_outputType = parser.add_mutually_exclusive_group()
 arg_outputType.add_argument("-c", "--cli", action="store_true", help="output the csv result to the command line")
 arg_outputType.add_argument("-o", "--output-to-file", dest="outputFilePath", type=str, help="output the csv result to the provided filepath. Default: ./csv-storage/")
     #Password offline or online mode
-parser.add_argument("-mP", "--password-mode", dest="passwordMode", type=str, choices=["offline", "online"], help="Specify password selection mode. Offline mode uses a stored wordlist to select passwords (Default wordlist is VERY BASIC!! REPLACE IF POSSIBLE!!) Quick and cheap, best suited for selecting simple passwords. Online mode loads a wordlist into RAM from a URL for selection. By default, this is set to a MUCH MORE ROBUST WORDLIST THAN OFFLINE MODE. Default: offline")
+parser.add_argument("-pM", "--password-mode", dest="passwordMode", type=str, choices=["offline", "online"], help="specify password selection mode. Offline mode uses a stored wordlist to select passwords (Default wordlist is VERY BASIC!! REPLACE IF POSSIBLE!!) Quick and cheap, best suited for selecting simple passwords. Online mode loads a wordlist into RAM from a URL for selection. By default, this is set to a MUCH MORE ROBUST WORDLIST THAN OFFLINE MODE. Default: offline")
+    #Password format (plaintext or SHA256)
+parser.add_argument("-pF", "--password-format", dest="passwordFormat", type=str, choices=["plaintext","md5","sha1","sha224","sha256","sha384","sha512","sha3_224","sha3_256","sha3_384","sha3_512","shake_128","shake_256","blake2b","blake2s"], help="specify password format in the csv file. Can output as plaintext or as one of the above hashes. Default: Plaintext")
     #Config YML to use
 parser.add_argument("--config-yml-filepath", dest="configFilePath", type=str, help="filepath of the config file to use. Default: ./config.yml")
     #Offline mode wordlists to use 
@@ -297,6 +299,13 @@ def generatePasswords(input):
             input[x][4] = random.choice(passwordChoices)
         else:
             input[x][4] = random.choice(passwordChoices) + random.choice(passwordChoices) + random.choice(passwordChoices)
+            #Print telling credential information
+            if not args.quiet:
+                print("\nYour telling credentials are:")
+                print("UN:",input[tellingCredLoc][3])
+                print("PW:",input[tellingCredLoc][4])
+                if args.passwordFormat is not None or args.passwordFormat != "plaintext": print("**WARNING** Password will be hashed upon output **WARNING**")
+                print("RECORD THESE NOW!\n")
 
 
 
@@ -325,8 +334,30 @@ def insertPredefinedCredentials(output):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def hashPasswords(output):
+    for x in range(1, len(output)): #For each row:
+        plaintextPassword = output[x][4]
+        hashedPassword = ""
+        match args.passwordFormat:
+            case "md5": hashedPassword = hashlib.md5(plaintextPassword.encode()).hexdigest()
+            case "sha1": hashedPassword = hashlib.sha1(plaintextPassword.encode()).hexdigest()
+            case "sha224": hashedPassword = hashlib.sha224(plaintextPassword.encode()).hexdigest()
+            case "sha256": hashedPassword = hashlib.sha256(plaintextPassword.encode()).hexdigest()
+            case "sha384": hashedPassword = hashlib.sha384(plaintextPassword.encode()).hexdigest()
+            case "sha512": hashedPassword = hashlib.sha512(plaintextPassword.encode()).hexdigest()
+            case "sha3_224": hashedPassword = hashlib.sha3_224(plaintextPassword.encode()).hexdigest()
+            case "sha3_256": hashedPassword = hashlib.sha3_256(plaintextPassword.encode()).hexdigest()
+            case "sha3_384": hashedPassword = hashlib.sha3_384(plaintextPassword.encode()).hexdigest()
+            case "sha3_512": hashedPassword = hashlib.sha3_512(plaintextPassword.encode()).hexdigest()
+            case "shake_128": hashedPassword = hashlib.shake_128(plaintextPassword.encode()).hexdigest()
+            case "shake_256": hashedPassword = hashlib.shake_256(plaintextPassword.encode()).hexdigest()
+            case "blake2b": hashedPassword = hashlib.blake2b(plaintextPassword.encode()).hexdigest()
+            case "blake2s": hashedPassword = hashlib.blake2s(plaintextPassword.encode()).hexdigest()
+        output[x][4] = hashedPassword
 
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def generateCredentialTable():    
     #Set up table
@@ -350,12 +381,10 @@ def generateCredentialTable():
         print("Selecting passwords")
     generatePasswords(output)
 
-    #Print telling credential information
-    if not args.quiet:
-        print("\nYour telling credentials are:")
-        print("UN:",output[tellingCredLoc][3])
-        print("PW:",output[tellingCredLoc][4])
-        print("RECORD THESE NOW!\n")
+    if args.passwordFormat is not None or args.passwordFormat != "plaintext":
+        if args.verbose:
+            print("Hashing passwords")
+        hashPasswords(output)
 
     insertPredefinedCredentials(output)
 

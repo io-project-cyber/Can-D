@@ -9,12 +9,11 @@ Features:
 - **Password complexity filtering** - make the junk passwords comply with your password policy!
 - **"Telling credential"** - an exceptionally complex and unique password is inserted somewhere into the output. Use this cred to determine if your junk data is being used in a spraying attack!
 - **Inject predefined credentials** - include credentials that you WANT the attacker to try. These could be real users or honey users designed to trip some other defense in your network!
+- **Automatic password hashing** - make the credentials seem more realistic by storing passwords as a hash digest. Options include MD5, SHA256, SHA512, and more.
 - **CLI and config file control** - adjust your credential generation and output to best fit your defenses/infrastructure!
 
 >PLANNED: Some passwords are more common than others - it's probably unusual to see perfectly unique passwords in a company. Therefore, assign different weight to passwords based on repetition (no need to make it too complicated.)
 
 >PLANNED: Company demographics could be interesting when selecting names. If your IT team is 50% European, roughly that many would have names based in European countries, so selecting names based off your company's real demographic information could help enhance the realism.
-
->PLANNED: Give option to store password hashes or plaintext passwords
 
 >PLANNED: Provide walkthrough and helper scripts for SQL import commands
