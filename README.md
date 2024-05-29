@@ -17,3 +17,39 @@ Features:
 >PLANNED: Company demographics could be interesting when selecting names. If your IT team is 50% European, roughly that many would have names based in European countries, so selecting names based off your company's real demographic information could help enhance the realism.
 
 >PLANNED: Provide walkthrough and helper scripts for SQL import commands
+
+## Installation
+To install: 
+```bash
+git clone https://github.com/ouro-borous/Can-D.git
+cd ./Can-D
+```
+If planning on using the **enhanced full name mode,**  you must install the **names-dataset** package via PyPi.
+```bash
+pip install names-dataset
+```
+It is recommended to set up a virtual environment before doing so.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install names-dataset
+```
+If you decide to use a virtual environment, remember to activate it before using enhanced full name mode.
+```bash
+source venv/bin/activate
+```
+## Dependencies
+- names-dataset
+## Usage
+For a basic credential CSV file:
+```bash
+./can-d.py
+```
+For help with options, you can try: 
+```bash
+./can-d.py -h
+```
+For a more advanced, realistic set of names and credentials:
+```bash
+./can-d.py -mP online -pF sha256 -v
+```
