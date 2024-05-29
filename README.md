@@ -51,5 +51,5 @@ For help with options, you can try:
 ```
 For a more advanced, realistic set of names and credentials:
 ```bash
-./can-d.py -mP online -pF sha256 -v
+./can-d.py -pO -pF sha256 -v
 ```
