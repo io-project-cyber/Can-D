@@ -5,5 +5,5 @@ python3 -m venv venv
 source venv/bin/activate
 pip install names-dataset
 echo "~~~~~~~"
-echo "!READY!"
+echo " READY "
 echo "~~~~~~~"
