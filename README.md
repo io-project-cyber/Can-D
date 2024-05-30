@@ -15,20 +15,23 @@ Features:
 - **Helper scripts** - easily install Can-D and import your table into MySQL!
 
 ## Installation
-To install: 
+To install via script:
+```bash
+curl https://raw.githubusercontent.com/ouro-borous/Can-D/main/helper-scripts/install-can-d.sh > bash
+```
+To install manually: 
 ```bash
 git clone https://github.com/ouro-borous/Can-D.git
 cd ./Can-D
-```
-If planning on using the **enhanced full name mode,**  you must install the **names-dataset** package via PyPi.
-```bash
-pip install names-dataset
+pip install -r requirements.txt
 ```
 It is recommended to set up a virtual environment before doing so.
 ```bash
+git clone https://github.com/ouro-borous/Can-D.git
+cd ./Can-D/
 python3 -m venv venv
 source venv/bin/activate
-pip install names-dataset
+pip install -r requirements.txt
 ```
 If you decide to use a virtual environment, remember to activate it before using enhanced full name mode.
 ```bash
@@ -39,13 +42,13 @@ source venv/bin/activate
 ## Usage
 For a basic credential CSV file:
 ```bash
-./can-d.py
+python3 ./can-d.py
 ```
 For help with options, you can try: 
 ```bash
-./can-d.py -h
+python3 ./can-d.py -h
 ```
 For a more advanced, realistic set of names and credentials (with hashed passwords):
 ```bash
-./can-d.py -v -nE -pO -pF sha256
+python3 ./can-d.py -v -nE -pO -pF sha256
 ```

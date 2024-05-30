@@ -1,5 +1,3 @@
-#!/bin/python3
-
 import urllib3
 import random
 import datetime
