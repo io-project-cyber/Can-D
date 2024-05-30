@@ -17,7 +17,7 @@ Features:
 ## Installation
 To install via script:
 ```bash
-curl https://raw.githubusercontent.com/ouro-borous/Can-D/main/helper-scripts/install-can-d.sh > bash
+curl https://raw.githubusercontent.com/ouro-borous/Can-D/main/helper-scripts/install-can-d.sh | bash
 ```
 To install manually: 
 ```bash
