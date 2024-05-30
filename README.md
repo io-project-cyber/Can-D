@@ -12,8 +12,7 @@ Features:
 - **Inject predefined credentials** - include credentials that you WANT the attacker to try. These could be real users or honey users designed to trip some other defense in your network!
 - **Automatic password hashing** - make the credentials seem more realistic by storing passwords as a hash digest. Options include MD5, SHA256, SHA512, and more.
 - **CLI and config file control** - adjust your credential generation and output to best fit your defenses/infrastructure!
-
->PLANNED: Provide walkthrough and helper scripts for SQL import commands
+- **Helper scripts** - easily install Can-D and import your table into MySQL!
 
 ## Installation
 To install: 
