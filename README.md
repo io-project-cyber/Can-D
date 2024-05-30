@@ -33,7 +33,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-If you decide to use a virtual environment, remember to activate it before using enhanced full name mode.
+If you decide to use a virtual environment, remember to activate it before using Can-D again.
 ```bash
 source venv/bin/activate
 ```
