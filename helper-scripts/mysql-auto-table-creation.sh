@@ -34,5 +34,5 @@ echo "LOAD DATA LOCAL INFILE $toImportFilePath INTO TABLE $table_name FIELDS TER
 sudo mysql --local-infile=1 < sql-server-commands.txt
 
 echo "Cleaning up permissions..."
-echo "SET GLOBAL local_infile=0;" >> sql-server-commands.txt
+echo "SET GLOBAL local_infile=0;" > sql-server-commands.txt
 sudo mysql < sql-server-commands.txt
