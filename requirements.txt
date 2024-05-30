@@ -1,8 +1,4 @@
 names-dataset
 urllib3
-random
 datetime
-yaml
-csv
 argparse
-hashlib
