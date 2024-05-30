@@ -24,7 +24,7 @@ sudo mysql < sql-server-commands.txt
 echo "USE $database_name;" > sql-server-commands.txt
 echo "CREATE TABLE $table_name (ID INT AUTO_INCREMENT PRIMARY KEY, firstName VARCHAR(100), lastName VARCHAR(100), username VARCHAR(250), password VARCHAR(200));" >> sql-server-commands.txt
 echo "LOAD DATA LOCAL INFILE $toImportFilePath INTO TABLE $table_name FIELDS TERMINATED BY ',' IGNORE 1 ROWS;" >> sql-server-commands.txt
-sudo mysql < sql-server-commands.txt
+sudo mysql --local-infile=1 < sql-server-commands.txt
 
-echo "SET GLOBAL local_infile=0;" > sql-server-commands.txt
+echo "SET GLOBAL local_infile=0;" >> sql-server-commands.txt
 sudo mysql < sql-server-commands.txt
