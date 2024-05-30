@@ -1,21 +1,42 @@
+#NOTE: -1 indicates "no user input"
+
 general:
+  #Number of credentials to include
   num_entries: 100
+  #Number of columns to initialize. DON'T CHANGE THIS (unless you're modifying can-d.py heavily)
   num_columns: 5
+  #Index at which to insert the telling credential
   telling_cred_index_in_table: -1
   credentials_to_include:
     #Example:
     #- "Marko, Morrison, markom, password"
     #(DON'T INCLUDE ENTRY ID)
+
 full_names:
+  enhanced_mode:
+    #To use demographic distribution for your full names, include a dictionary of country codes and their corresponding percentages (decimal form) within your company. 
+    #Use Alpha-3 notation for the country codes (e.g. Afghanistan -> AFG)
+    #The percentage decimals must add up to 1.
+    #If there is a percentage of people that have unspecified origin, use the country code ANY.
+    #Example:
+    #demographic_distribution: {US: 0.20, IN: 0.30, CH: 0.30, ANY: 0.20}
+    demographic_distribution: {US: 0.20, IN: 0.30, CH: 0.30, ANY: 0.20}
 
 usernames:
+  #Usernames use the first and last name of each "person" to create a username. 
   naming_convention:
-    first_name_letter_num: -1
+    #Number of letters to use from the first name (L -> R)
+    first_name_letter_num: 1
+    #Number of letters to use from the last name (L -> R)
     last_name_letter_num: -1
+    #Order of first/last name combination.
     first_name_placed_first: True
+
 passwords:
   online_mode:
+    #"Online password mode" requests a wordlist from a given url. Select it here.
     url: "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/xato-net-10-million-passwords.txt"
+  #Password complexity requirements.
   complexity_requirements:
     minimum_length: -1
     minimum_digits: -1

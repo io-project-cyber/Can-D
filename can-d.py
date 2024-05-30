@@ -9,7 +9,7 @@ import argparse
 import hashlib
 
 #SET UP ARGS
-parser = argparse.ArgumentParser(description="A deceptive credential generator for cyber defense. Creates a CSV output of useless, \"junk\" credentials intended to look real. Use this in a honeypot or legitimate database and introduce uncertainty to exfiltrated data. Can output to file or CLI.")
+parser = argparse.ArgumentParser(description="A deceptive credential generator for cyber defense. Creates a CSV output of useless, \"junk\" credentials intended to look real. Use this in a honeypot or legitimate database and introduce uncertainty to exfiltrated data. Can output to file or CLI. Check config.yml for more configuration options.")
 #General arguments
     #Verbosity
 arg_verbosity = parser.add_mutually_exclusive_group()
@@ -19,10 +19,12 @@ arg_verbosity.add_argument("-q", "--quiet", help="enables quiet operation", acti
 arg_outputType = parser.add_mutually_exclusive_group()
 arg_outputType.add_argument("-c", "--cli", action="store_true", help="output the csv result to the command line")
 arg_outputType.add_argument("-o", "--output-to-file", dest="outputFilePath", type=str, help="output the csv result to the provided filepath. Default: ./csv-storage/")
-    #Password offline or online mode
-parser.add_argument("-pM", "--password-mode", dest="passwordMode", type=str, choices=["offline", "online"], help="specify password selection mode. Offline mode uses a stored wordlist to select passwords (Default wordlist is VERY BASIC!! REPLACE IF POSSIBLE!!) Quick and cheap, best suited for selecting simple passwords. Online mode loads a wordlist into RAM from a URL for selection. By default, this is set to a MUCH MORE ROBUST WORDLIST THAN OFFLINE MODE. Default: offline")
-    #Password format (plaintext or SHA256)
-parser.add_argument("-pF", "--password-format", dest="passwordFormat", type=str, choices=["plaintext","md5","sha1","sha224","sha256","sha384","sha512","sha3_224","sha3_256","sha3_384","sha3_512","shake_128","shake_256","blake2b","blake2s"], help="specify password format in the csv file. Can output as plaintext or as one of the above hashes. Default: Plaintext")
+    #Full name mode
+parser.add_argument("-nE", "--enhanced-names", dest="fullNameMode", help="activates enhanced name selection mode. Simple mode uses the default wordlists and randomly selects first and last names. Enhanced mode uses the name-dataset package and provided demographic information to select a more representative set of names. Default: simple", action="store_true")
+    #Enable password online mode
+parser.add_argument("-pO", "--online-passwords", dest="passwordMode", help="activates online password selection mode. Simple mode uses a stored wordlist to select passwords (Default wordlist is VERY BASIC!! REPLACE IF POSSIBLE!!) Quick and cheap, best suited for selecting simple passwords. Online mode loads a wordlist into RAM from a URL for selection. By default, this is set to a MUCH MORE ROBUST WORDLIST THAN SIMPLE MODE. Default: simple", action="store_true")
+    #Password format (set to a hash option provided)
+parser.add_argument("-pF", "--password-format", dest="passwordFormat", type=str, choices=["md5","sha1","sha224","sha256","sha384","sha512","sha3_224","sha3_256","sha3_384","sha3_512","shake_128","shake_256","blake2b","blake2s"], help="specify password hash format in the csv file. Default: plaintext")
     #Config YML to use
 parser.add_argument("--config-yml-filepath", dest="configFilePath", type=str, help="filepath of the config file to use. Default: ./config.yml")
     #Offline mode wordlists to use 
@@ -35,7 +37,7 @@ args = parser.parse_args()
 if args.verbose:
     print("CLI arguments successfully parsed")
 
-#SET UP CONFIG FILE
+#SET UP \tCONFIG FILE
 #Read config file, set up global variables
 configLoc = "./config.yml"
 if args.configFilePath is not None:
@@ -49,12 +51,7 @@ if args.verbose:
 numColumns = config['general']['num_columns']
 numEntries = config['general']['num_entries']
 if args.verbose:
-    print("CONFIG: Table size successfully parsed")
-
-#Set up credentials to insert
-credentialsToInsert = config['general']['credentials_to_include']
-if args.verbose:
-    print("CONFIG: Predefined credentials successfully parsed")
+    print("\tCONFIG: Table size successfully parsed")
 
 #Set up telling credential location
 if (config['general']['telling_cred_index_in_table'] == -1): #If not specified, place the telling credential at a random point past halfway in the table
@@ -62,14 +59,24 @@ if (config['general']['telling_cred_index_in_table'] == -1): #If not specified, 
 else: #Otherwise, place it at the specified location
     tellingCredLoc = config['general']['telling_cred_index_in_table']
 if args.verbose:
-    print("CONFIG: Telling credential location successfully determined")
+    print("\tCONFIG: Telling credential location successfully determined")
+
+#Set up credentials to insert
+credentialsToInsert = config['general']['credentials_to_include']
+if args.verbose:
+    print("\tCONFIG: Predefined credentials successfully parsed")
+
+#Set up full name demographic information for enhanced mode
+demographics = config['full_names']['enhanced_mode']['demographic_distribution']
+if args.verbose:
+    print("\tCONFIG: Full name demographics successfully parsed")
 
 #Set up username convention
 firstNameLetterNum = config['usernames']['naming_convention']['first_name_letter_num']
 lastNameLetterNum = config['usernames']['naming_convention']['last_name_letter_num']
 firstNamePlacedFirst = config['usernames']['naming_convention']['first_name_placed_first']
 if args.verbose:
-    print("CONFIG: Username convention successfully parsed")
+    print("\tCONFIG: Username convention successfully parsed")
 
 #Set up online mode URL
 wordlistURL = config['passwords']['online_mode']['url']
@@ -80,7 +87,7 @@ passwordMinDigits = config['passwords']['complexity_requirements']['minimum_digi
 passwordMinSymbols = config['passwords']['complexity_requirements']['minimum_symbols']
 passwordMinCaps = config['passwords']['complexity_requirements']['minimum_caps']
 if args.verbose:
-    print("CONFIG: Password complexity specifications successfully parsed")
+    print("\tCONFIG: Password complexity specifications successfully parsed")
 
 #Complete
 if args.verbose:
@@ -92,37 +99,113 @@ if not args.quiet:
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#Helper method for enhanced full name selection.
 
+def ndToList(input, countryCode, usingFirstName):
+    output = []
+    if usingFirstName:
+        if args.verbose:
+            print("\t\tFinding first names from:",countryCode)
+        femaleNames = input[countryCode]['F']
+        maleNames = input[countryCode]['M']
+        output.extend(femaleNames)
+        output.extend(maleNames)
+    else:
+        if args.verbose:
+            print("\t\tFinding last names from:",countryCode)
+        output.extend(input[countryCode])
+    #print("CHOICES:",output)
+    return output
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 # When passed a credential table,
 # Select and insert a full name (First name -> [1], Last name -> [2]) for each row
 def generateFullNames(input):
-    firstNameChoices = []
-    firstNameFilePath = "./default-wordlists/firstnames.txt"
-    if args.firstNameFilePath is not None:
-        firstNameFilePath = args.firstNameFilePath
-    with open(firstNameFilePath) as f:
-        firstNameChoices = f.read().splitlines()
+    if args.verbose:
+        print("\tNAMES: Generating full names")
+    #Simple mode
+    if not args.fullNameMode: 
+        if args.verbose:
+            print("\tNAMES: Using simple mode")
+        firstNameChoices = []
+        firstNameFilePath = "./default-wordlists/firstnames.txt"
+        if args.firstNameFilePath is not None:
+            firstNameFilePath = args.firstNameFilePath
+        with open(firstNameFilePath) as f:
+            firstNameChoices = f.read().splitlines()
+        
+        lastNameChoices = []
+        lastNameFilePath = "./default-wordlists/lastnames.txt"
+        if args.lastNameFilePath is not None:
+            lastNameFilePath = args.lastNameFilePath
+        with open(lastNameFilePath) as f:
+            lastNameChoices = f.read().splitlines()
+
+        for x in range(1, numEntries + 1):
+            input[x][1] = random.choice(firstNameChoices)
+            input[x][2] = random.choice(lastNameChoices)
     
-    lastNameChoices = []
-    lastNameFilePath = "./default-wordlists/lastnames.txt"
-    if args.lastNameFilePath is not None:
-        lastNameFilePath = args.lastNameFilePath
-    with open(lastNameFilePath) as f:
-        lastNameChoices = f.read().splitlines()
+    #Enhanced mode
+    else:
+        global demographics
+        if args.verbose:
+            print("\tNAMES: Using enhanced mode. THIS MIGHT TAKE A WHILE.")
+        from names_dataset import NameDataset, NameWrapper
+        nd = NameDataset()
+        if args.verbose:
+            print("\tNAMES: Names dataset loaded.")
+        #Create list of names to insert
+        fullNamesToInsert = []
+        #Get list of keys (countries to be used)
+        countriesToInsert = list(demographics.keys())
+        #Check if ANY appears. If it does,
+        if args.verbose:
+            print("\tNAMES: Inputting names of nonspecified origin")
+        if "ANY" in countriesToInsert:
+            #Read ANY percent
+            anyPercent = demographics["ANY"]
+            #Find number of people to select from anywhere
+            ANYToInsert = int(numEntries * anyPercent)
+            
+            #Get list of all countries
+            allCountries = nd.get_country_codes(alpha_2=True)
+            
+            for x in range(0, ANYToInsert):                                                                             #For each person:
+                randCountry = random.choice(allCountries)                                                                   #Select random country
 
-    for x in range(1, numEntries):
-        input[x][1] = random.choice(firstNameChoices)
-        input[x][2] = random.choice(lastNameChoices)
-
-
+                firstNamesFromRandCountry = ndToList(nd.get_top_names(n=50, country_alpha2=randCountry, use_first_names=True), randCountry, True)        #Select first + last name from country
+                ANYfirstName = random.choice(firstNamesFromRandCountry)  
+                lastNamesFromRandCountry = ndToList(nd.get_top_names(n=50, country_alpha2=randCountry, use_first_names=False), randCountry, False)
+                ANYlastName = random.choice(lastNamesFromRandCountry)
+                                                                   
+                ANYfullName = [ANYfirstName, ANYlastName]                                                                   #Place into two-index list
+                fullNamesToInsert.append(ANYfullName)                                                                       #Input into overall name list
+            countriesToInsert.remove('ANY')
+        if args.verbose:
+            print("\tNAMES: Inputting names of specified origin")
+        for countryCode in countriesToInsert:                                                                       #For each country
+            countryPercent = demographics[countryCode]
+            numCountryToInsert = int(numEntries * countryPercent)
+            firstNamesFromCountry = ndToList(nd.get_top_names(n=50, country_alpha2=countryCode, use_first_names=True), countryCode, True)           
+            lastNamesFromCountry = ndToList(nd.get_top_names(n=50, country_alpha2=countryCode, use_first_names=False), countryCode, False)           
+            for x in range(0, numCountryToInsert):                                                                      #For each person:
+                
+                countryFirstName = random.choice(firstNamesFromCountry)                 # Find a first name
+                
+                countryLastName = random.choice(lastNamesFromCountry)                   # Find a last name
+                
+                fullName = [countryFirstName, countryLastName]                                                              #Place into two-index list
+                fullNamesToInsert.append(fullName)                                                                          #Input into overall name list
+        random.shuffle(fullNamesToInsert)                       #Shuffle list
+        for x in range(1, numEntries + 1):                      #Insert list into document
+            input[x][1] = fullNamesToInsert[x-1][0]
+            input[x][2] = fullNamesToInsert[x-1][1]
+        
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
 
 # When passed a credential table WITH FIRST AND LAST NAMES FILLED IN,
 # Select and insert a username (based on the full name, username -> [3]) for each row
@@ -139,12 +222,9 @@ def generateUsernames(input):
     uniqueUsernamesPostProcess = {}
 
     #Iterate through list, select a username for each entry.
-    for x in range(1, numEntries):
-        if (x != tellingCredLoc):
+    for x in range(1, numEntries + 1):
             #input[x][3] = random.choice(usernameChoices)
-            input[x][3] = usernameConventionApplicator(input[x][1], input[x][2], uniqueUsernamesPostProcess)
-        else:
-            input[x][3] = random.choice(usernameChoices) + random.choice(usernameChoices) + random.choice(usernameChoices)
+        input[x][3] = usernameConventionApplicator(input[x][1], input[x][2], uniqueUsernamesPostProcess)
             
 #When passed a first name, last name, and list of already created usernames,
 #Apply a globally defined username convention to the names, generating a unique username
@@ -204,26 +284,26 @@ def generatePasswords(input):
 
     #Read in all passwords
     passwordChoices = []
-    #If offline mode is being used
-    if args.passwordMode == "offline" or args.passwordMode is None:
+    #If simple mode is being used
+    if args.passwordMode is None or not args.passwordMode:
         if args.verbose:
-            print("PASSWORD: Offline mode enabled.")
+            print("\tPASSWORD: Simple mode enabled.")
         passwordFilePath = "./default-wordlists/passwords.txt"
         if args.passwordFilePath is not None:
             passwordFilePath = args.passwordFilePath
         if args.verbose:
-            print("PASSWORD: Using",passwordFilePath)
+            print("\tPASSWORD: Using",passwordFilePath)
         with open(passwordFilePath) as f:
             passwordChoices = f.read().splitlines()
     #Otherwise, online mode is being used
     else:
         if args.verbose:
-            print("PASSWORD: Online mode enabled.")
-            print("PASSWORD: Requesting wordlist from",wordlistURL)
+            print("\tPASSWORD: Online mode enabled.")
+            print("\tPASSWORD: Requesting wordlist from",wordlistURL)
         http = urllib3.PoolManager()
         resp = http.request("GET", wordlistURL)
         if args.verbose:
-            print("PASSWORD: Request successful. Parsing into password choice list.")
+            print("\tPASSWORD: Request successful. Parsing into password choice list.")
         passwordChoices = resp.data.decode().split('\n')
 
     #Adjust password complexity specifications (defaults to no requirements)
@@ -294,7 +374,7 @@ def generatePasswords(input):
         passwordChoices.append(filteredPasswordChoices[x])
     filteredPasswordChoices.clear()
 
-    for x in range(1, numEntries):
+    for x in range(1, numEntries + 1):
         if (x != tellingCredLoc):
             input[x][4] = random.choice(passwordChoices)
         else:
@@ -304,7 +384,7 @@ def generatePasswords(input):
                 print("\nYour telling credentials are:")
                 print("UN:",input[tellingCredLoc][3])
                 print("PW:",input[tellingCredLoc][4])
-                if args.passwordFormat is not None or args.passwordFormat != "plaintext": print("**WARNING** Password will be hashed upon output **WARNING**")
+                if args.passwordFormat is not None: print("**WARNING** Password will be hashed upon output **WARNING**")
                 print("RECORD THESE NOW!\n")
 
 
@@ -361,9 +441,9 @@ def hashPasswords(output):
 
 def generateCredentialTable():    
     #Set up table
-    output = [[0]*numColumns for i in range(numEntries)]
+    output = [[0]*numColumns for i in range(0, numEntries + 1)]
     output[0] = ["adminID", "firstName", "lastName", "username", "password"]
-    for x in range(1, numEntries):
+    for x in range(1, numEntries + 1):
         output[x][0] = x
     
     #Fill in full names of table
@@ -381,17 +461,17 @@ def generateCredentialTable():
         print("Selecting passwords")
     generatePasswords(output)
 
-    if args.passwordFormat is not None or args.passwordFormat != "plaintext":
+    if args.passwordFormat is not None:
         if args.verbose:
             print("Hashing passwords")
         hashPasswords(output)
-
+    
     insertPredefinedCredentials(output)
 
     return output
 
 def printTableAsCSV(input):
-    for x in range(0, numEntries): #For each row:
+    for x in range(0, numEntries + 1): #For each row:
         for y in range(0, numColumns - 1): #For each entry, print in csv format
             print(input[x][y],",",end='',sep='')
         print(input[x][numColumns - 1])
@@ -405,7 +485,7 @@ def outputTableToCSVFile(input):
         filename = str(timestamp) + ".csv"
         filepath = "./csv-storage/" + filename
     outputfile = open(filepath, "w+")
-    for x in range(0, numEntries): #For each row:
+    for x in range(0, numEntries + 1): #For each row:
         for y in range(0, numColumns - 1): #For each entry, print in csv format
             print(input[x][y],",",end='',sep='',file=outputfile)
         print(input[x][numColumns - 1],file=outputfile)
