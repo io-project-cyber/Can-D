@@ -7,3 +7,4 @@ pip install -r requirements.txt
 echo "~~~~~~~"
 echo " READY "
 echo "~~~~~~~"
+echo "Don't forget to activate your venv before using Can-D!"
