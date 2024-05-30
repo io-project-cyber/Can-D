@@ -37,7 +37,7 @@ args = parser.parse_args()
 if args.verbose:
     print("CLI arguments successfully parsed")
 
-#SET UP \tCONFIG FILE
+#SET UP CONFIG FILE
 #Read config file, set up global variables
 configLoc = "./config.yml"
 if args.configFilePath is not None:
@@ -68,6 +68,9 @@ if args.verbose:
 
 #Set up full name demographic information for enhanced mode
 demographics = config['full_names']['enhanced_mode']['demographic_distribution']
+nameOptionCount = config['full_names']['enhanced_mode']['name_options']
+if nameOptionCount == -1:
+    nameOptionCount = 500
 if args.verbose:
     print("\tCONFIG: Full name demographics successfully parsed")
 
@@ -175,9 +178,9 @@ def generateFullNames(input):
             for x in range(0, ANYToInsert):                                                                             #For each person:
                 randCountry = random.choice(allCountries)                                                                   #Select random country
 
-                firstNamesFromRandCountry = ndToList(nd.get_top_names(n=50, country_alpha2=randCountry, use_first_names=True), randCountry, True)        #Select first + last name from country
+                firstNamesFromRandCountry = ndToList(nd.get_top_names(n=nameOptionCount, country_alpha2=randCountry, use_first_names=True), randCountry, True)        #Select first + last name from country
                 ANYfirstName = random.choice(firstNamesFromRandCountry)  
-                lastNamesFromRandCountry = ndToList(nd.get_top_names(n=50, country_alpha2=randCountry, use_first_names=False), randCountry, False)
+                lastNamesFromRandCountry = ndToList(nd.get_top_names(n=nameOptionCount, country_alpha2=randCountry, use_first_names=False), randCountry, False)
                 ANYlastName = random.choice(lastNamesFromRandCountry)
                                                                    
                 ANYfullName = [ANYfirstName, ANYlastName]                                                                   #Place into two-index list
@@ -188,8 +191,8 @@ def generateFullNames(input):
         for countryCode in countriesToInsert:                                                                       #For each country
             countryPercent = demographics[countryCode]
             numCountryToInsert = int(numEntries * countryPercent)
-            firstNamesFromCountry = ndToList(nd.get_top_names(n=50, country_alpha2=countryCode, use_first_names=True), countryCode, True)           
-            lastNamesFromCountry = ndToList(nd.get_top_names(n=50, country_alpha2=countryCode, use_first_names=False), countryCode, False)           
+            firstNamesFromCountry = ndToList(nd.get_top_names(n=nameOptionCount, country_alpha2=countryCode, use_first_names=True), countryCode, True)           
+            lastNamesFromCountry = ndToList(nd.get_top_names(n=nameOptionCount, country_alpha2=countryCode, use_first_names=False), countryCode, False)           
             for x in range(0, numCountryToInsert):                                                                      #For each person:
                 
                 countryFirstName = random.choice(firstNamesFromCountry)                 # Find a first name
