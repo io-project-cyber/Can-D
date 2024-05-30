@@ -39,6 +39,10 @@ source venv/bin/activate
 ```
 ## Dependencies
 - names-dataset
+- pyyaml
+- argparse
+- datetime
+- urllib3
 ## Usage
 For a basic credential CSV file:
 ```bash
