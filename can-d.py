@@ -160,6 +160,10 @@ def generateFullNames(input):
         #Create list of names to insert
         fullNamesToInsert = []
         #Get list of keys (countries to be used)
+        if demographics is None:
+            if args.verbose:
+                print("\tNAMES: No demographic information found. Defaulting to {\"ANY\": 1}")
+            demographics = {"ANY": 1}
         countriesToInsert = list(demographics.keys())
         #Check if ANY appears. If it does,
         if args.verbose:

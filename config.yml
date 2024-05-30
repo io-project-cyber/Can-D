@@ -18,9 +18,10 @@ full_names:
     #Use Alpha-3 notation for the country codes (e.g. Afghanistan -> AFG)
     #The percentage decimals must add up to 1.
     #If there is a percentage of people that have unspecified origin, use the country code ANY.
+    #Defaults to {"ANY": 1}
     #Example:
     #demographic_distribution: {US: 0.20, IN: 0.30, CH: 0.30, ANY: 0.20}
-    demographic_distribution: {US: 0.20, IN: 0.30, CH: 0.30, ANY: 0.20}
+    demographic_distribution:
     #Choose how many name options you want to select from per country. THIS CAN BE VERY INTENSIVE AT HIGH VALUES! Default: 500
     name_options: -1
 
