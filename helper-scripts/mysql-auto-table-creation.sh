@@ -9,6 +9,11 @@ do
     esac
 done
 
+if [ -z "$database_name" ] || [ -z "$table_name" ]; then
+    echo "Missing -d or -t"
+    exit 1
+fi
+
 cd ..
                                      #If csv-storage/toImport.csv doesn't exist, THIS COMMAND IS RAN.
 [ -f ./csv-storage/toImport.csv ] || ./can-d.py -v -pO -o ./csv-storage/toImport.csv
@@ -17,14 +22,17 @@ toImportFilePath="'"
 toImportFilePath+=$(pwd)
 toImportFilePath+="/csv-storage/toImport.csv'"
 
+echo "Creating database..."
 echo "CREATE DATABASE $database_name;" > sql-server-commands.txt
 echo "SET GLOBAL local_infile=1;" >> sql-server-commands.txt
 sudo mysql < sql-server-commands.txt
 
+echo "Inserting table..."
 echo "USE $database_name;" > sql-server-commands.txt
 echo "CREATE TABLE $table_name (ID INT AUTO_INCREMENT PRIMARY KEY, firstName VARCHAR(100), lastName VARCHAR(100), username VARCHAR(250), password VARCHAR(200));" >> sql-server-commands.txt
 echo "LOAD DATA LOCAL INFILE $toImportFilePath INTO TABLE $table_name FIELDS TERMINATED BY ',' IGNORE 1 ROWS;" >> sql-server-commands.txt
 sudo mysql --local-infile=1 < sql-server-commands.txt
 
+echo "Cleaning up permissions..."
 echo "SET GLOBAL local_infile=0;" >> sql-server-commands.txt
 sudo mysql < sql-server-commands.txt
