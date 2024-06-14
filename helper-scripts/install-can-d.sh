@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo apt update
-sudo apt install git pip -y
+sudo apt install git pip python3-venv -y
 git clone https://github.com/ouro-borous/Can-D.git
 cd ./Can-D/
 python3 -m venv venv
